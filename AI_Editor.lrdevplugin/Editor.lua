@@ -9,17 +9,17 @@ local LrExportSession = import 'LrExportSession'
 local LrProgressScope = import 'LrProgressScope'
 local LrApplicationView = import 'LrApplicationView'
 local LrDevelopController = import 'LrDevelopController'
+local LrHttp = import 'LrHttp'
 
 -- 插件目录路径
 local PLUGIN_PATH = _PLUGIN.path
 
--- 配置 (使用相对路径)
-local PYTHON_PATH = "python"  -- 使用系统 PATH 中的 python
-local WORKER_PATH = PLUGIN_PATH .. "/../worker/worker.py"  -- worker 在插件目录的上级目录
+-- 配置
+local SERVICE_URL = "http://127.0.0.1:5000/analyze"  -- Python HTTP 服务地址
 local PREVIEW_SIZE = 384
 local MODEL = "litellm_proxy/mimo"
 local LOG_FILE = PLUGIN_PATH .. "/lr_ai_log.txt"
-local WAIT_TIMEOUT_SECONDS = 70
+local REQUEST_TIMEOUT = 60  -- HTTP 请求超时秒数
 
 local function log(msg)
     local f = io.open(LOG_FILE, "a")
@@ -271,10 +271,8 @@ LrTasks.startAsyncTask(function()
         tostring(currentSettings.Tint)
     ))
 
-    -- 写入请求文件
-    local requestPath = tempDir .. "/request.json"
-    local requestFile = io.open(requestPath, "w")
-    requestFile:write(string.format([[
+    -- 构建请求JSON
+    local requestBody = string.format([[
 {
   "image_path": "%s",
   "model": "%s",
@@ -419,130 +417,49 @@ LrTasks.startAsyncTask(function()
         jsonEscape(metadataValue(photo, "shutterSpeed")),
         jsonEscape(metadataValue(photo, "captureTime"))
     ))
-    requestFile:close()
-    log("请求文件: " .. requestPath)
+    log("请求JSON已生成")
 
-    -- 用wscript隐藏启动cmd，cmd负责记录worker输出，避免弹出控制台窗口。
-    local cmdPath = tempDir .. "/run_worker.cmd"
-    local workerLogPath = tempDir .. "/worker.log"
-    local cmdFile = io.open(cmdPath, "w")
-    cmdFile:write("@echo off\n")
-    cmdFile:write("chcp 65001 >nul\n")
-    cmdFile:write(string.format('"%s" "%s" "%s" > "%s" 2>&1\n', PYTHON_PATH, WORKER_PATH:gsub("/", "\\"), tempDir:gsub("/", "\\"), workerLogPath:gsub("/", "\\")))
-    cmdFile:close()
-    log("cmd文件: " .. cmdPath)
-    log("worker日志: " .. workerLogPath)
+    -- 发送 HTTP POST 请求到 Python 服务
+    progress:setCaption("调用AI模型...")
+    log("发送HTTP请求到: " .. SERVICE_URL)
 
-    local vbsPath = tempDir .. "/run_worker.vbs"
-    local commandLine = string.format('cmd.exe /c "%s"', cmdPath:gsub("/", "\\"))
-    local vbsFile = io.open(vbsPath, "w")
-    vbsFile:write('Set shell = CreateObject("WScript.Shell")\n')
-    vbsFile:write(string.format('shell.Run "%s", 0, False\n', commandLine:gsub('"', '""')))
-    vbsFile:close()
-    log("vbs文件: " .. vbsPath)
+    local headers = {
+        { field = "Content-Type", value = "application/json" },
+    }
 
-    -- 使用完整路径调用wscript
-    local wscriptPath = "C:\\Windows\\System32\\wscript.exe"
-    LrTasks.execute(string.format('%s "%s"', wscriptPath, vbsPath:gsub("/", "\\")))
-    log("已隐藏启动Python进程")
-
-    -- 等待结果文件，同时检测错误
-    local resultPath = tempDir .. "/result.json"
-    local maxWait = WAIT_TIMEOUT_SECONDS
-    local waited = 0
-    local workerStarted = false
-    local lastLogCheck = 0
-
-    while not LrFileUtils.exists(resultPath) and waited < maxWait do
-        if progress:isCanceled() then
-            log("用户取消")
-            progress:done()
-            return
-        end
-        LrTasks.sleep(1)
-        waited = waited + 1
-        progress:setPortionComplete(waited, maxWait)
-        progress:setCaption(string.format("AI分析中... %d秒", waited))
-
-        -- 每3秒检查worker日志，检测启动状态和错误
-        if waited % 3 == 0 then
-            local logFile = io.open(workerLogPath, "r")
-            if logFile then
-                local logContent = logFile:read("*a")
-                logFile:close()
-                if logContent and logContent ~= "" then
-                    workerStarted = true
-                    -- 检查是否有错误标记
-                    if logContent:find("failed") or logContent:find("错误") or logContent:find("Error") or logContent:find("failed:") then
-                        log("检测到worker错误: " .. logContent:sub(1, 200))
-                        -- 等一下看是否会生成result.json（worker会写错误结果）
-                        LrTasks.sleep(2)
-                        if not LrFileUtils.exists(resultPath) then
-                            progress:done()
-                            LrDialogs.message("AI分析失败", "Worker执行出错:\n" .. logContent .. "\n\n日志: " .. LOG_FILE)
-                            return
-                        end
-                    end
-                end
-            end
-
-            -- 10秒后如果worker还没启动，提前报错
-            if waited >= 10 and not workerStarted then
-                log("Worker未启动，检查Python环境")
-                -- 再等2秒确认
-                LrTasks.sleep(2)
-                local logFile2 = io.open(workerLogPath, "r")
-                local logContent2 = logFile2 and logFile2:read("*a") or ""
-                if logFile2 then logFile2:close() end
-                if logContent2 == "" then
-                    progress:done()
-                    LrDialogs.message("Worker未启动",
-                        "Python进程未启动，请检查:\n" ..
-                        "1. python是否在系统PATH中（CMD运行python --version）\n" ..
-                        "2. LiteLLM是否运行（litellm --config litellm_config.yaml --port 4000）\n" ..
-                        "3. worker目录是否存在\n\n" ..
-                        "临时目录: " .. tempDir .. "\n" ..
-                        "VBS文件: " .. vbsPath)
-                    return
-                end
-            end
-
-            if waited % 10 == 0 then
-                log("等待... " .. waited .. "秒, worker已启动: " .. tostring(workerStarted))
-            end
-        end
-    end
+    local responseBody, responseHeaders = LrHttp.post(
+        SERVICE_URL,
+        requestBody,
+        headers,
+        "POST",
+        REQUEST_TIMEOUT
+    )
 
     progress:done()
 
-    if not LrFileUtils.exists(resultPath) then
-        log("超时! 等待了" .. waited .. "秒")
-        local logFile = io.open(workerLogPath, "r")
-        local logContent = logFile and logFile:read("*a") or "(无日志)"
-        if logFile then logFile:close() end
-        LrDialogs.message("超时",
-            "AI分析超时，已等待 " .. waited .. " 秒\n\n" ..
-            "Worker日志:\n" .. logContent .. "\n\n" ..
-            "插件日志: " .. LOG_FILE)
+    if not responseBody then
+        -- HTTP 请求失败
+        local errorMsg = "HTTP请求失败"
+        if responseHeaders and responseHeaders.error then
+            errorMsg = errorMsg .. ": " .. (responseHeaders.error.name or "未知错误")
+            if responseHeaders.error.errorCode then
+                errorMsg = errorMsg .. " (" .. responseHeaders.error.errorCode .. ")"
+            end
+        end
+        log(errorMsg)
+        LrDialogs.message("请求失败",
+            errorMsg .. "\n\n" ..
+            "请确认 Python HTTP 服务正在运行:\n" ..
+            "python worker/worker_service.py --port 5000\n\n" ..
+            "日志: " .. LOG_FILE)
         return
     end
 
-    log("收到结果，耗时" .. waited .. "秒")
+    log("HTTP响应: " .. responseBody:sub(1, 500))
 
-    -- 读取结果
-    local resultFile = io.open(resultPath, "r")
-    local resultContent = resultFile:read("*a")
-    resultFile:close()
-    log("结果: " .. resultContent)
-
-    local rawText = ""
-    local rawPath = tempDir .. "/raw.txt"
-    if LrFileUtils.exists(rawPath) then
-        local rawFile = io.open(rawPath, "r")
-        rawText = rawFile:read("*a")
-        rawFile:close()
-        log("原始LLM输出: " .. rawText)
-    end
+    -- 解析JSON结果 (HTTP响应直接包含结果)
+    local resultContent = responseBody
+    local rawText = resultContent:match('"raw_content"%s*:%s*"([^"]*)"') or ""
 
     -- 解析JSON到参数表
     local params = {}
