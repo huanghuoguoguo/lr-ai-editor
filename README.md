@@ -16,8 +16,8 @@ Lightroom (Lua插件)
     ↓ 导出小预览图 (384px)
     ↓ LrHttp.post 发送JSON请求
 Python HTTP Service (worker_service.py)
-    ↓ 调用LiteLLM Proxy
-视觉模型 (GPT-4o / Claude / Gemini / Mimo / Ollama)
+    ↓ 直接调用 AI 模型 API
+视觉模型 (GPT-4o / Claude / Mimo / Ollama)
     ↓ 返回JSON (建议 + 参数)
 Lightroom
     ↓ 显示结果对话框
@@ -29,28 +29,34 @@ Lightroom
 ### 1. 安装Python依赖
 
 ```bash
-pip install litellm
 cd worker
 pip install -r requirements.txt
 ```
 
-### 2. 创建LiteLLM配置
+### 2. 配置模型
 
-```yaml
-# litellm_config.yaml (参考 litellm_config.yaml.example)
-model_list:
-  - model_name: gpt-4o
-    litellm_params:
-      model: openai/gpt-4o
-      api_key: os.environ/OPENAI_API_KEY
+编辑 `worker/config.py`，设置模型和 API Key：
 
-  - model_name: claude-vision
-    litellm_params:
-      model: claude-3-5-sonnet-20241022
-      api_key: os.environ/ANTHROPIC_API_KEY
+```python
+# 使用 OpenAI
+DEFAULT_MODEL = "openai/gpt-4o"
+API_KEY = "your-openai-key"
 
-general_settings:
-  master_key: your-master-key
+# 使用 Anthropic
+DEFAULT_MODEL = "anthropic/claude-3-5-sonnet-20241022"
+API_KEY = "your-anthropic-key"
+
+# 使用自定义 API
+DEFAULT_MODEL = "xiaomi_mimo/mimo-v2.5"
+API_KEY = "your-api-key"
+API_BASE = "https://your-api-base/v1"
+```
+
+或通过环境变量配置：
+```bash
+set DEFAULT_MODEL=your-model
+set API_KEY=your-key
+set API_BASE=your-base-url  # 可选
 ```
 
 ### 3. 安装Lightroom插件
@@ -72,21 +78,12 @@ general_settings:
 
 ## 使用
 
-### 启动服务（必须先启动）
+### 启动服务
 
-使用前需要启动两个服务：
-
-**1. 启动 LiteLLM Proxy**（AI 模型代理）
+使用前需要启动 HTTP 分析服务：
 
 ```bash
-cd lr-ai-editor
-litellm --config litellm_config.yaml --port 4000
-```
-
-**2. 启动 HTTP 分析服务**
-
-```bash
-cd lr-ai-editor/worker
+cd worker
 python worker_service.py --port 5000
 ```
 
