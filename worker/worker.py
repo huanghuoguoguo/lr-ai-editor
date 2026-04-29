@@ -139,6 +139,74 @@ HSL_FIELDS = {
     "luminance_blue": ("LuminanceAdjustmentBlue", -8, 8, 0),
 }
 
+OPTIONAL_GROUP_FIELDS = {
+    "tone_curve": {
+        "parametric_shadows": ("ParametricShadows", -12, 12, 0),
+        "parametric_darks": ("ParametricDarks", -12, 12, 0),
+        "parametric_lights": ("ParametricLights", -12, 12, 0),
+        "parametric_highlights": ("ParametricHighlights", -12, 12, 0),
+    },
+    "detail": {
+        "sharpness": ("Sharpness", 0, 60, 40),
+        "sharpen_radius": ("SharpenRadius", 0.5, 2.0, 1.0),
+        "sharpen_detail": ("SharpenDetail", 0, 40, 25),
+        "sharpen_masking": ("SharpenEdgeMasking", 0, 80, 0),
+        "luminance_noise_reduction": ("LuminanceSmoothing", 0, 35, 0),
+        "color_noise_reduction": ("ColorNoiseReduction", 0, 35, 25),
+    },
+    "effects": {
+        "post_crop_vignette_amount": ("PostCropVignetteAmount", -20, 10, 0),
+        "post_crop_vignette_midpoint": ("PostCropVignetteMidpoint", 20, 80, 50),
+        "post_crop_vignette_feather": ("PostCropVignetteFeather", 40, 90, 50),
+        "grain_amount": ("GrainAmount", 0, 20, 0),
+        "grain_size": ("GrainSize", 10, 35, 25),
+        "grain_frequency": ("GrainFrequency", 30, 70, 50),
+    },
+    "color_grading": {
+        "shadow_hue": ("SplitToningShadowHue", 0, 360, 0),
+        "shadow_saturation": ("SplitToningShadowSaturation", 0, 12, 0),
+        "highlight_hue": ("SplitToningHighlightHue", 0, 360, 0),
+        "highlight_saturation": ("SplitToningHighlightSaturation", 0, 12, 0),
+        "balance": ("SplitToningBalance", -30, 30, 0),
+    },
+    "lens_corrections": {
+        "profile_enable": ("LensProfileEnable", 0, 1, 0),
+        "auto_lateral_ca": ("AutoLateralCA", 0, 1, 0),
+        "manual_distortion": ("LensManualDistortionAmount", -15, 15, 0),
+        "vignetting_amount": ("LensVignettingAmount", -20, 20, 0),
+        "vignetting_midpoint": ("LensVignettingMidpoint", 20, 80, 50),
+    },
+}
+
+
+def normalize_optional_group(
+    result: dict,
+    group_name: str,
+    fields: dict,
+    current_settings: dict | None = None,
+    max_delta: float = 10,
+) -> dict:
+    source = result.get(group_name)
+    if not isinstance(source, dict):
+        source = {}
+    normalized = {}
+    for output_key, (lr_key, low, high, fallback) in fields.items():
+        current = fallback
+        if current_settings:
+            try:
+                current = float(current_settings.get(lr_key, fallback))
+            except (TypeError, ValueError):
+                current = fallback
+        try:
+            value = float(source.get(output_key, current))
+        except (TypeError, ValueError):
+            value = current
+        value = max(low, min(high, value))
+        value = max(current - max_delta, min(current + max_delta, value))
+        normalized[output_key] = value
+    result[group_name] = normalized
+    return result
+
 
 def normalize_hsl(result: dict, current_settings: dict | None = None) -> dict:
     source = result.get("hsl")
@@ -210,7 +278,13 @@ def apply_mvp_safety_limits(result: dict, current_settings: dict | None = None) 
                 result[output_key] = max(current - max_delta, min(current + max_delta, value))
             except (TypeError, ValueError):
                 pass
-    return normalize_hsl(result, current_settings)
+    result = normalize_hsl(result, current_settings)
+    result = normalize_optional_group(result, "tone_curve", OPTIONAL_GROUP_FIELDS["tone_curve"], current_settings, max_delta=8)
+    result = normalize_optional_group(result, "detail", OPTIONAL_GROUP_FIELDS["detail"], current_settings, max_delta=10)
+    result = normalize_optional_group(result, "effects", OPTIONAL_GROUP_FIELDS["effects"], current_settings, max_delta=10)
+    result = normalize_optional_group(result, "color_grading", OPTIONAL_GROUP_FIELDS["color_grading"], current_settings, max_delta=360)
+    result = normalize_optional_group(result, "lens_corrections", OPTIONAL_GROUP_FIELDS["lens_corrections"], current_settings, max_delta=8)
+    return result
 
 
 async def analyze_image(

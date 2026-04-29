@@ -73,8 +73,14 @@ local function setDevelopValue(param, value)
     if not n then
         return
     end
-    LrDevelopController.setValue(param, n)
-    log(string.format("LrDevelopController.setValue成功: %s=%s", param, tostring(n)))
+    local ok, err = LrTasks.pcall(function()
+        LrDevelopController.setValue(param, n)
+    end)
+    if ok then
+        log(string.format("LrDevelopController.setValue成功: %s=%s", param, tostring(n)))
+    else
+        log(string.format("LrDevelopController.setValue失败: %s=%s, err=%s", param, tostring(n), tostring(err)))
+    end
 end
 
 local function getDevelopValue(param, defaultValue)
@@ -218,6 +224,32 @@ LrTasks.startAsyncTask(function()
         LuminanceAdjustmentGreen = getDevelopValue("LuminanceAdjustmentGreen", 0),
         LuminanceAdjustmentAqua = getDevelopValue("LuminanceAdjustmentAqua", 0),
         LuminanceAdjustmentBlue = getDevelopValue("LuminanceAdjustmentBlue", 0),
+        ParametricShadows = getDevelopValue("ParametricShadows", 0),
+        ParametricDarks = getDevelopValue("ParametricDarks", 0),
+        ParametricLights = getDevelopValue("ParametricLights", 0),
+        ParametricHighlights = getDevelopValue("ParametricHighlights", 0),
+        Sharpness = getDevelopValue("Sharpness", 40),
+        SharpenRadius = getDevelopValue("SharpenRadius", 1.0),
+        SharpenDetail = getDevelopValue("SharpenDetail", 25),
+        SharpenEdgeMasking = getDevelopValue("SharpenEdgeMasking", 0),
+        LuminanceSmoothing = getDevelopValue("LuminanceSmoothing", 0),
+        ColorNoiseReduction = getDevelopValue("ColorNoiseReduction", 25),
+        PostCropVignetteAmount = getDevelopValue("PostCropVignetteAmount", 0),
+        PostCropVignetteMidpoint = getDevelopValue("PostCropVignetteMidpoint", 50),
+        PostCropVignetteFeather = getDevelopValue("PostCropVignetteFeather", 50),
+        GrainAmount = getDevelopValue("GrainAmount", 0),
+        GrainSize = getDevelopValue("GrainSize", 25),
+        GrainFrequency = getDevelopValue("GrainFrequency", 50),
+        SplitToningShadowHue = getDevelopValue("SplitToningShadowHue", 0),
+        SplitToningShadowSaturation = getDevelopValue("SplitToningShadowSaturation", 0),
+        SplitToningHighlightHue = getDevelopValue("SplitToningHighlightHue", 0),
+        SplitToningHighlightSaturation = getDevelopValue("SplitToningHighlightSaturation", 0),
+        SplitToningBalance = getDevelopValue("SplitToningBalance", 0),
+        LensProfileEnable = getDevelopValue("LensProfileEnable", 0),
+        AutoLateralCA = getDevelopValue("AutoLateralCA", 0),
+        LensManualDistortionAmount = getDevelopValue("LensManualDistortionAmount", 0),
+        LensVignettingAmount = getDevelopValue("LensVignettingAmount", 0),
+        LensVignettingMidpoint = getDevelopValue("LensVignettingMidpoint", 50),
     }
     log(string.format(
         "当前Develop参数: Exposure=%s, Contrast=%s, Highlights=%s, Shadows=%s, Whites=%s, Blacks=%s, Texture=%s, Clarity=%s, Dehaze=%s, Vibrance=%s, Saturation=%s, Temperature=%s, Tint=%s",
@@ -275,7 +307,33 @@ LrTasks.startAsyncTask(function()
     "LuminanceAdjustmentYellow": %s,
     "LuminanceAdjustmentGreen": %s,
     "LuminanceAdjustmentAqua": %s,
-    "LuminanceAdjustmentBlue": %s
+    "LuminanceAdjustmentBlue": %s,
+    "ParametricShadows": %s,
+    "ParametricDarks": %s,
+    "ParametricLights": %s,
+    "ParametricHighlights": %s,
+    "Sharpness": %s,
+    "SharpenRadius": %s,
+    "SharpenDetail": %s,
+    "SharpenEdgeMasking": %s,
+    "LuminanceSmoothing": %s,
+    "ColorNoiseReduction": %s,
+    "PostCropVignetteAmount": %s,
+    "PostCropVignetteMidpoint": %s,
+    "PostCropVignetteFeather": %s,
+    "GrainAmount": %s,
+    "GrainSize": %s,
+    "GrainFrequency": %s,
+    "SplitToningShadowHue": %s,
+    "SplitToningShadowSaturation": %s,
+    "SplitToningHighlightHue": %s,
+    "SplitToningHighlightSaturation": %s,
+    "SplitToningBalance": %s,
+    "LensProfileEnable": %s,
+    "AutoLateralCA": %s,
+    "LensManualDistortionAmount": %s,
+    "LensVignettingAmount": %s,
+    "LensVignettingMidpoint": %s
   },
   "metadata": {
     "fileName": "%s",
@@ -323,6 +381,32 @@ LrTasks.startAsyncTask(function()
         developSetting(currentSettings, "LuminanceAdjustmentGreen", nil, 0),
         developSetting(currentSettings, "LuminanceAdjustmentAqua", nil, 0),
         developSetting(currentSettings, "LuminanceAdjustmentBlue", nil, 0),
+        developSetting(currentSettings, "ParametricShadows", nil, 0),
+        developSetting(currentSettings, "ParametricDarks", nil, 0),
+        developSetting(currentSettings, "ParametricLights", nil, 0),
+        developSetting(currentSettings, "ParametricHighlights", nil, 0),
+        developSetting(currentSettings, "Sharpness", nil, 40),
+        developSetting(currentSettings, "SharpenRadius", nil, 1.0),
+        developSetting(currentSettings, "SharpenDetail", nil, 25),
+        developSetting(currentSettings, "SharpenEdgeMasking", nil, 0),
+        developSetting(currentSettings, "LuminanceSmoothing", nil, 0),
+        developSetting(currentSettings, "ColorNoiseReduction", nil, 25),
+        developSetting(currentSettings, "PostCropVignetteAmount", nil, 0),
+        developSetting(currentSettings, "PostCropVignetteMidpoint", nil, 50),
+        developSetting(currentSettings, "PostCropVignetteFeather", nil, 50),
+        developSetting(currentSettings, "GrainAmount", nil, 0),
+        developSetting(currentSettings, "GrainSize", nil, 25),
+        developSetting(currentSettings, "GrainFrequency", nil, 50),
+        developSetting(currentSettings, "SplitToningShadowHue", nil, 0),
+        developSetting(currentSettings, "SplitToningShadowSaturation", nil, 0),
+        developSetting(currentSettings, "SplitToningHighlightHue", nil, 0),
+        developSetting(currentSettings, "SplitToningHighlightSaturation", nil, 0),
+        developSetting(currentSettings, "SplitToningBalance", nil, 0),
+        developSetting(currentSettings, "LensProfileEnable", nil, 0),
+        developSetting(currentSettings, "AutoLateralCA", nil, 0),
+        developSetting(currentSettings, "LensManualDistortionAmount", nil, 0),
+        developSetting(currentSettings, "LensVignettingAmount", nil, 0),
+        developSetting(currentSettings, "LensVignettingMidpoint", nil, 50),
         jsonEscape(metadataValue(photo, "fileName")),
         jsonEscape(metadataValue(photo, "cameraModel")),
         jsonEscape(metadataValue(photo, "lens")),
@@ -435,6 +519,32 @@ LrTasks.startAsyncTask(function()
     local lumGreen = resultNumber(resultContent, "luminance_green")
     local lumAqua = resultNumber(resultContent, "luminance_aqua")
     local lumBlue = resultNumber(resultContent, "luminance_blue")
+    local curveShadows = resultNumber(resultContent, "parametric_shadows")
+    local curveDarks = resultNumber(resultContent, "parametric_darks")
+    local curveLights = resultNumber(resultContent, "parametric_lights")
+    local curveHighlights = resultNumber(resultContent, "parametric_highlights")
+    local sharpness = resultNumber(resultContent, "sharpness")
+    local sharpenRadius = resultNumber(resultContent, "sharpen_radius")
+    local sharpenDetail = resultNumber(resultContent, "sharpen_detail")
+    local sharpenMasking = resultNumber(resultContent, "sharpen_masking")
+    local luminanceNr = resultNumber(resultContent, "luminance_noise_reduction")
+    local colorNr = resultNumber(resultContent, "color_noise_reduction")
+    local vignetteAmount = resultNumber(resultContent, "post_crop_vignette_amount")
+    local vignetteMidpoint = resultNumber(resultContent, "post_crop_vignette_midpoint")
+    local vignetteFeather = resultNumber(resultContent, "post_crop_vignette_feather")
+    local grainAmount = resultNumber(resultContent, "grain_amount")
+    local grainSize = resultNumber(resultContent, "grain_size")
+    local grainFrequency = resultNumber(resultContent, "grain_frequency")
+    local shadowHue = resultNumber(resultContent, "shadow_hue")
+    local shadowSat = resultNumber(resultContent, "shadow_saturation")
+    local highlightHue = resultNumber(resultContent, "highlight_hue")
+    local highlightSat = resultNumber(resultContent, "highlight_saturation")
+    local splitBalance = resultNumber(resultContent, "balance")
+    local lensProfileEnable = resultNumber(resultContent, "profile_enable")
+    local autoLateralCA = resultNumber(resultContent, "auto_lateral_ca")
+    local manualDistortion = resultNumber(resultContent, "manual_distortion")
+    local lensVignettingAmount = resultNumber(resultContent, "vignetting_amount")
+    local lensVignettingMidpoint = resultNumber(resultContent, "vignetting_midpoint")
 
     log("解析: advice=" .. (advice or "nil"))
 
@@ -490,6 +600,25 @@ LrTasks.startAsyncTask(function()
         },
         f:row {
             f:static_text { title = string.format("绿 明/饱/相: %.0f / %.0f / %.0f", tonumber(lumGreen) or 0, tonumber(satGreen) or 0, tonumber(hueGreen) or 0) },
+        },
+
+        f:separator {},
+
+        f:static_text { title = "曲线 / 细节 / 效果:", font = "<bold>" },
+        f:row {
+            f:static_text { title = string.format("曲线 阴/暗/亮/高: %.0f / %.0f / %.0f / %.0f", tonumber(curveShadows) or 0, tonumber(curveDarks) or 0, tonumber(curveLights) or 0, tonumber(curveHighlights) or 0) },
+        },
+        f:row {
+            f:static_text { title = string.format("锐化: %.0f  半径: %.1f  降噪: %.0f/%.0f", tonumber(sharpness) or 0, tonumber(sharpenRadius) or 0, tonumber(luminanceNr) or 0, tonumber(colorNr) or 0) },
+        },
+        f:row {
+            f:static_text { title = string.format("暗角: %.0f  颗粒: %.0f", tonumber(vignetteAmount) or 0, tonumber(grainAmount) or 0) },
+        },
+        f:row {
+            f:static_text { title = string.format("分离色调 阴影: %.0f/%.0f  高光: %.0f/%.0f", tonumber(shadowHue) or 0, tonumber(shadowSat) or 0, tonumber(highlightHue) or 0, tonumber(highlightSat) or 0) },
+        },
+        f:row {
+            f:static_text { title = string.format("镜头校正: 配置 %.0f  色差 %.0f  畸变 %.0f", tonumber(lensProfileEnable) or 0, tonumber(autoLateralCA) or 0, tonumber(manualDistortion) or 0) },
         },
 
         f:separator {},
@@ -574,6 +703,32 @@ LrTasks.startAsyncTask(function()
             setDevelopValue("LuminanceAdjustmentGreen", lumGreen)
             setDevelopValue("LuminanceAdjustmentAqua", lumAqua)
             setDevelopValue("LuminanceAdjustmentBlue", lumBlue)
+            setDevelopValue("ParametricShadows", curveShadows)
+            setDevelopValue("ParametricDarks", curveDarks)
+            setDevelopValue("ParametricLights", curveLights)
+            setDevelopValue("ParametricHighlights", curveHighlights)
+            setDevelopValue("Sharpness", sharpness)
+            setDevelopValue("SharpenRadius", sharpenRadius)
+            setDevelopValue("SharpenDetail", sharpenDetail)
+            setDevelopValue("SharpenEdgeMasking", sharpenMasking)
+            setDevelopValue("LuminanceSmoothing", luminanceNr)
+            setDevelopValue("ColorNoiseReduction", colorNr)
+            setDevelopValue("PostCropVignetteAmount", vignetteAmount)
+            setDevelopValue("PostCropVignetteMidpoint", vignetteMidpoint)
+            setDevelopValue("PostCropVignetteFeather", vignetteFeather)
+            setDevelopValue("GrainAmount", grainAmount)
+            setDevelopValue("GrainSize", grainSize)
+            setDevelopValue("GrainFrequency", grainFrequency)
+            setDevelopValue("SplitToningShadowHue", shadowHue)
+            setDevelopValue("SplitToningShadowSaturation", shadowSat)
+            setDevelopValue("SplitToningHighlightHue", highlightHue)
+            setDevelopValue("SplitToningHighlightSaturation", highlightSat)
+            setDevelopValue("SplitToningBalance", splitBalance)
+            setDevelopValue("LensProfileEnable", lensProfileEnable)
+            setDevelopValue("AutoLateralCA", autoLateralCA)
+            setDevelopValue("LensManualDistortionAmount", manualDistortion)
+            setDevelopValue("LensVignettingAmount", lensVignettingAmount)
+            setDevelopValue("LensVignettingMidpoint", lensVignettingMidpoint)
         end)
         if applyOk then
             log("LrDevelopController应用流程完成")

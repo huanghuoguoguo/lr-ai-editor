@@ -78,6 +78,42 @@ BASE_PROMPT = """分析这张照片，给出Lightroom修图参数建议。
         "luminance_green": 绿色明亮度(-100到+100),
         "luminance_aqua": 浅绿明亮度(-100到+100),
         "luminance_blue": 蓝色明亮度(-100到+100)
+    },
+    "tone_curve": {
+        "parametric_shadows": 阴影曲线(-100到+100),
+        "parametric_darks": 暗调曲线(-100到+100),
+        "parametric_lights": 亮调曲线(-100到+100),
+        "parametric_highlights": 高光曲线(-100到+100)
+    },
+    "detail": {
+        "sharpness": 锐化数量(0到150),
+        "sharpen_radius": 锐化半径(0.5到3.0),
+        "sharpen_detail": 锐化细节(0到100),
+        "sharpen_masking": 锐化蒙版(0到100),
+        "luminance_noise_reduction": 明亮度降噪(0到100),
+        "color_noise_reduction": 颜色降噪(0到100)
+    },
+    "effects": {
+        "post_crop_vignette_amount": 裁剪后暗角数量(-100到+100),
+        "post_crop_vignette_midpoint": 暗角中点(0到100),
+        "post_crop_vignette_feather": 暗角羽化(0到100),
+        "grain_amount": 颗粒数量(0到100),
+        "grain_size": 颗粒大小(0到100),
+        "grain_frequency": 颗粒粗糙度(0到100)
+    },
+    "color_grading": {
+        "shadow_hue": 阴影色相(0到360),
+        "shadow_saturation": 阴影饱和度(0到100),
+        "highlight_hue": 高光色相(0到360),
+        "highlight_saturation": 高光饱和度(0到100),
+        "balance": 平衡(-100到+100)
+    },
+    "lens_corrections": {
+        "profile_enable": 是否启用镜头配置文件(0或1),
+        "auto_lateral_ca": 是否移除色差(0或1),
+        "manual_distortion": 手动畸变(-100到+100),
+        "vignetting_amount": 镜头暗角数量(-100到+100),
+        "vignetting_midpoint": 镜头暗角中点(0到100)
     }
 }
 
