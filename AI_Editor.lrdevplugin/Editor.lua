@@ -428,20 +428,20 @@ LrTasks.startAsyncTask(function()
     local cmdFile = io.open(cmdPath, "w")
     cmdFile:write("@echo off\n")
     cmdFile:write("chcp 65001 >nul\n")
-    cmdFile:write(string.format('"%s" "%s" "%s" > "%s" 2>&1\n', PYTHON_PATH, WORKER_PATH, tempDir, workerLogPath))
+    cmdFile:write(string.format('"%s" "%s" "%s" > "%s" 2>&1\n', PYTHON_PATH, WORKER_PATH:gsub("/", "\\"), tempDir:gsub("/", "\\"), workerLogPath:gsub("/", "\\")))
     cmdFile:close()
     log("cmd文件: " .. cmdPath)
     log("worker日志: " .. workerLogPath)
 
     local vbsPath = tempDir .. "/run_worker.vbs"
-    local commandLine = string.format('cmd.exe /c "%s"', cmdPath)
+    local commandLine = string.format('cmd.exe /c "%s"', cmdPath:gsub("/", "\\"))
     local vbsFile = io.open(vbsPath, "w")
     vbsFile:write('Set shell = CreateObject("WScript.Shell")\n')
     vbsFile:write(string.format('shell.Run "%s", 0, False\n', commandLine:gsub('"', '""')))
     vbsFile:close()
     log("vbs文件: " .. vbsPath)
 
-    LrTasks.execute(string.format('wscript.exe "%s"', vbsPath))
+    LrTasks.execute(string.format('wscript.exe "%s"', vbsPath:gsub("/", "\\")))
     log("已隐藏启动Python进程")
 
     -- 等待结果文件
