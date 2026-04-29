@@ -10,12 +10,15 @@ local LrProgressScope = import 'LrProgressScope'
 local LrApplicationView = import 'LrApplicationView'
 local LrDevelopController = import 'LrDevelopController'
 
--- 固定配置
-local PYTHON_PATH = "C:/Users/glwuy/AppData/Local/Programs/Python/Python312/python.exe"
-local WORKER_PATH = "D:/image/lr-ai-editor/worker/worker.py"
+-- 插件目录路径
+local PLUGIN_PATH = _PLUGIN.path
+
+-- 配置 (使用相对路径)
+local PYTHON_PATH = "python"  -- 使用系统 PATH 中的 python
+local WORKER_PATH = PLUGIN_PATH .. "/../worker/worker.py"  -- worker 在插件目录的上级目录
 local PREVIEW_SIZE = 384
 local MODEL = "litellm_proxy/mimo"
-local LOG_FILE = "D:/image/lr_ai_log.txt"
+local LOG_FILE = PLUGIN_PATH .. "/lr_ai_log.txt"
 local WAIT_TIMEOUT_SECONDS = 70
 
 local function log(msg)
@@ -145,9 +148,10 @@ LrTasks.startAsyncTask(function()
     end
     log("用户修图要求: " .. tostring(prefs.stylePrompt))
 
-    -- 创建临时文件夹
+    -- 创建临时文件夹 (使用系统临时目录)
     local timestamp = os.time()
-    local tempDir = "C:/Users/glwuy/Desktop/lr_ai_" .. timestamp
+    local tempBase = os.getenv("TEMP") or os.getenv("TMP") or "C:/Temp"
+    local tempDir = tempBase .. "/lr_ai_" .. timestamp
     LrFileUtils.createAllDirectories(tempDir)
     log("临时目录: " .. tempDir)
 
