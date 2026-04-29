@@ -490,139 +490,140 @@ LrTasks.startAsyncTask(function()
         log("原始LLM输出: " .. rawText)
     end
 
-    -- 解析JSON
-    local advice = resultContent:match('"advice"%s*:%s*"([^"]*)"')
-    local exposure = resultNumber(resultContent, "exposure")
-    local contrast = resultNumber(resultContent, "contrast")
-    local highlights = resultNumber(resultContent, "highlights")
-    local shadows = resultNumber(resultContent, "shadows")
-    local whites = resultNumber(resultContent, "whites")
-    local blacks = resultNumber(resultContent, "blacks")
-    local texture = resultNumber(resultContent, "texture")
-    local clarity = resultNumber(resultContent, "clarity")
-    local dehaze = resultNumber(resultContent, "dehaze")
-    local vibrance = resultNumber(resultContent, "vibrance")
-    local saturation = resultNumber(resultContent, "saturation")
-    local temperature = resultNumber(resultContent, "temperature")
-    local tint = resultNumber(resultContent, "tint")
-    local hueRed = resultNumber(resultContent, "hue_red")
-    local hueOrange = resultNumber(resultContent, "hue_orange")
-    local hueYellow = resultNumber(resultContent, "hue_yellow")
-    local hueGreen = resultNumber(resultContent, "hue_green")
-    local hueAqua = resultNumber(resultContent, "hue_aqua")
-    local hueBlue = resultNumber(resultContent, "hue_blue")
-    local satRed = resultNumber(resultContent, "saturation_red")
-    local satOrange = resultNumber(resultContent, "saturation_orange")
-    local satYellow = resultNumber(resultContent, "saturation_yellow")
-    local satGreen = resultNumber(resultContent, "saturation_green")
-    local satAqua = resultNumber(resultContent, "saturation_aqua")
-    local satBlue = resultNumber(resultContent, "saturation_blue")
-    local lumRed = resultNumber(resultContent, "luminance_red")
-    local lumOrange = resultNumber(resultContent, "luminance_orange")
-    local lumYellow = resultNumber(resultContent, "luminance_yellow")
-    local lumGreen = resultNumber(resultContent, "luminance_green")
-    local lumAqua = resultNumber(resultContent, "luminance_aqua")
-    local lumBlue = resultNumber(resultContent, "luminance_blue")
-    local curveShadows = resultNumber(resultContent, "parametric_shadows")
-    local curveDarks = resultNumber(resultContent, "parametric_darks")
-    local curveLights = resultNumber(resultContent, "parametric_lights")
-    local curveHighlights = resultNumber(resultContent, "parametric_highlights")
-    local sharpness = resultNumber(resultContent, "sharpness")
-    local sharpenRadius = resultNumber(resultContent, "sharpen_radius")
-    local sharpenDetail = resultNumber(resultContent, "sharpen_detail")
-    local sharpenMasking = resultNumber(resultContent, "sharpen_masking")
-    local luminanceNr = resultNumber(resultContent, "luminance_noise_reduction")
-    local colorNr = resultNumber(resultContent, "color_noise_reduction")
-    local vignetteAmount = resultNumber(resultContent, "post_crop_vignette_amount")
-    local vignetteMidpoint = resultNumber(resultContent, "post_crop_vignette_midpoint")
-    local vignetteFeather = resultNumber(resultContent, "post_crop_vignette_feather")
-    local grainAmount = resultNumber(resultContent, "grain_amount")
-    local grainSize = resultNumber(resultContent, "grain_size")
-    local grainFrequency = resultNumber(resultContent, "grain_frequency")
-    local shadowHue = resultNumber(resultContent, "shadow_hue")
-    local shadowSat = resultNumber(resultContent, "shadow_saturation")
-    local highlightHue = resultNumber(resultContent, "highlight_hue")
-    local highlightSat = resultNumber(resultContent, "highlight_saturation")
-    local splitBalance = resultNumber(resultContent, "balance")
-    local lensProfileEnable = resultNumber(resultContent, "profile_enable")
-    local autoLateralCA = resultNumber(resultContent, "auto_lateral_ca")
-    local manualDistortion = resultNumber(resultContent, "manual_distortion")
-    local lensVignettingAmount = resultNumber(resultContent, "vignetting_amount")
-    local lensVignettingMidpoint = resultNumber(resultContent, "vignetting_midpoint")
+    -- 解析JSON到参数表
+    local params = {}
+    params.advice = resultContent:match('"advice"%s*:%s*"([^"]*)"')
+    params.exposure = resultNumber(resultContent, "exposure")
+    params.contrast = resultNumber(resultContent, "contrast")
+    params.highlights = resultNumber(resultContent, "highlights")
+    params.shadows = resultNumber(resultContent, "shadows")
+    params.whites = resultNumber(resultContent, "whites")
+    params.blacks = resultNumber(resultContent, "blacks")
+    params.texture = resultNumber(resultContent, "texture")
+    params.clarity = resultNumber(resultContent, "clarity")
+    params.dehaze = resultNumber(resultContent, "dehaze")
+    params.vibrance = resultNumber(resultContent, "vibrance")
+    params.saturation = resultNumber(resultContent, "saturation")
+    params.temperature = resultNumber(resultContent, "temperature")
+    params.tint = resultNumber(resultContent, "tint")
+    params.hueRed = resultNumber(resultContent, "hue_red")
+    params.hueOrange = resultNumber(resultContent, "hue_orange")
+    params.hueYellow = resultNumber(resultContent, "hue_yellow")
+    params.hueGreen = resultNumber(resultContent, "hue_green")
+    params.hueAqua = resultNumber(resultContent, "hue_aqua")
+    params.hueBlue = resultNumber(resultContent, "hue_blue")
+    params.satRed = resultNumber(resultContent, "saturation_red")
+    params.satOrange = resultNumber(resultContent, "saturation_orange")
+    params.satYellow = resultNumber(resultContent, "saturation_yellow")
+    params.satGreen = resultNumber(resultContent, "saturation_green")
+    params.satAqua = resultNumber(resultContent, "saturation_aqua")
+    params.satBlue = resultNumber(resultContent, "saturation_blue")
+    params.lumRed = resultNumber(resultContent, "luminance_red")
+    params.lumOrange = resultNumber(resultContent, "luminance_orange")
+    params.lumYellow = resultNumber(resultContent, "luminance_yellow")
+    params.lumGreen = resultNumber(resultContent, "luminance_green")
+    params.lumAqua = resultNumber(resultContent, "luminance_aqua")
+    params.lumBlue = resultNumber(resultContent, "luminance_blue")
+    params.curveShadows = resultNumber(resultContent, "parametric_shadows")
+    params.curveDarks = resultNumber(resultContent, "parametric_darks")
+    params.curveLights = resultNumber(resultContent, "parametric_lights")
+    params.curveHighlights = resultNumber(resultContent, "parametric_highlights")
+    params.sharpness = resultNumber(resultContent, "sharpness")
+    params.sharpenRadius = resultNumber(resultContent, "sharpen_radius")
+    params.sharpenDetail = resultNumber(resultContent, "sharpen_detail")
+    params.sharpenMasking = resultNumber(resultContent, "sharpen_masking")
+    params.luminanceNr = resultNumber(resultContent, "luminance_noise_reduction")
+    params.colorNr = resultNumber(resultContent, "color_noise_reduction")
+    params.vignetteAmount = resultNumber(resultContent, "post_crop_vignette_amount")
+    params.vignetteMidpoint = resultNumber(resultContent, "post_crop_vignette_midpoint")
+    params.vignetteFeather = resultNumber(resultContent, "post_crop_vignette_feather")
+    params.grainAmount = resultNumber(resultContent, "grain_amount")
+    params.grainSize = resultNumber(resultContent, "grain_size")
+    params.grainFrequency = resultNumber(resultContent, "grain_frequency")
+    params.shadowHue = resultNumber(resultContent, "shadow_hue")
+    params.shadowSat = resultNumber(resultContent, "shadow_saturation")
+    params.highlightHue = resultNumber(resultContent, "highlight_hue")
+    params.highlightSat = resultNumber(resultContent, "highlight_saturation")
+    params.splitBalance = resultNumber(resultContent, "balance")
+    params.lensProfileEnable = resultNumber(resultContent, "profile_enable")
+    params.autoLateralCA = resultNumber(resultContent, "auto_lateral_ca")
+    params.manualDistortion = resultNumber(resultContent, "manual_distortion")
+    params.lensVignettingAmount = resultNumber(resultContent, "vignetting_amount")
+    params.lensVignettingMidpoint = resultNumber(resultContent, "vignetting_midpoint")
 
-    log("解析: advice=" .. (advice or "nil"))
+    log("解析: advice=" .. (params.advice or "nil"))
 
     -- 显示结果
     local f = LrView.osFactory()
     local prefs = LrPrefs.prefsForPlugin()
-    local canApply = advice and not advice:find("失败") and not advice:find("未返回") and not advice:find("超时")
+    local canApply = params.advice and not params.advice:find("失败") and not params.advice:find("未返回") and not params.advice:find("超时")
 
     local resultDialog = f:column {
         spacing = f:control_spacing(),
         bind_to_object = prefs,
 
         f:static_text { title = "AI 建议:", font = "<bold>" },
-        f:static_text { title = advice or "无", width_in_chars = 40, height_in_chars = 2 },
+        f:static_text { title = params.advice or "无", width_in_chars = 40, height_in_chars = 2 },
 
         f:separator {},
 
         f:static_text { title = "推荐参数:", font = "<bold>" },
         f:row {
-            f:static_text { title = string.format("曝光: %.1f", tonumber(exposure) or 0) },
-            f:static_text { title = string.format("对比度: %.0f", tonumber(contrast) or 0) },
+            f:static_text { title = string.format("曝光: %.1f", tonumber(params.exposure) or 0) },
+            f:static_text { title = string.format("对比度: %.0f", tonumber(params.contrast) or 0) },
         },
         f:row {
-            f:static_text { title = string.format("高光: %.0f", tonumber(highlights) or 0) },
-            f:static_text { title = string.format("阴影: %.0f", tonumber(shadows) or 0) },
+            f:static_text { title = string.format("高光: %.0f", tonumber(params.highlights) or 0) },
+            f:static_text { title = string.format("阴影: %.0f", tonumber(params.shadows) or 0) },
         },
         f:row {
-            f:static_text { title = string.format("白色: %.0f", tonumber(whites) or 0) },
-            f:static_text { title = string.format("黑色: %.0f", tonumber(blacks) or 0) },
+            f:static_text { title = string.format("白色: %.0f", tonumber(params.whites) or 0) },
+            f:static_text { title = string.format("黑色: %.0f", tonumber(params.blacks) or 0) },
         },
         f:row {
-            f:static_text { title = string.format("纹理: %.0f", tonumber(texture) or 0) },
-            f:static_text { title = string.format("清晰: %.0f", tonumber(clarity) or 0) },
-            f:static_text { title = string.format("去雾: %.0f", tonumber(dehaze) or 0) },
+            f:static_text { title = string.format("纹理: %.0f", tonumber(params.texture) or 0) },
+            f:static_text { title = string.format("清晰: %.0f", tonumber(params.clarity) or 0) },
+            f:static_text { title = string.format("去雾: %.0f", tonumber(params.dehaze) or 0) },
         },
         f:row {
-            f:static_text { title = string.format("自然饱和: %.0f", tonumber(vibrance) or 0) },
-            f:static_text { title = string.format("饱和度: %.0f", tonumber(saturation) or 0) },
+            f:static_text { title = string.format("自然饱和: %.0f", tonumber(params.vibrance) or 0) },
+            f:static_text { title = string.format("饱和度: %.0f", tonumber(params.saturation) or 0) },
         },
         f:row {
-            f:static_text { title = string.format("色温: %.0f", tonumber(temperature) or 0) },
-            f:static_text { title = string.format("色调: %.0f", tonumber(tint) or 0) },
+            f:static_text { title = string.format("色温: %.0f", tonumber(params.temperature) or 0) },
+            f:static_text { title = string.format("色调: %.0f", tonumber(params.tint) or 0) },
         },
 
         f:separator {},
 
         f:static_text { title = "HSL 推荐:", font = "<bold>" },
         f:row {
-            f:static_text { title = string.format("橙 明/饱/相: %.0f / %.0f / %.0f", tonumber(lumOrange) or 0, tonumber(satOrange) or 0, tonumber(hueOrange) or 0) },
+            f:static_text { title = string.format("橙 明/饱/相: %.0f / %.0f / %.0f", tonumber(params.lumOrange) or 0, tonumber(params.satOrange) or 0, tonumber(params.hueOrange) or 0) },
         },
         f:row {
-            f:static_text { title = string.format("黄 明/饱/相: %.0f / %.0f / %.0f", tonumber(lumYellow) or 0, tonumber(satYellow) or 0, tonumber(hueYellow) or 0) },
+            f:static_text { title = string.format("黄 明/饱/相: %.0f / %.0f / %.0f", tonumber(params.lumYellow) or 0, tonumber(params.satYellow) or 0, tonumber(params.hueYellow) or 0) },
         },
         f:row {
-            f:static_text { title = string.format("绿 明/饱/相: %.0f / %.0f / %.0f", tonumber(lumGreen) or 0, tonumber(satGreen) or 0, tonumber(hueGreen) or 0) },
+            f:static_text { title = string.format("绿 明/饱/相: %.0f / %.0f / %.0f", tonumber(params.lumGreen) or 0, tonumber(params.satGreen) or 0, tonumber(params.hueGreen) or 0) },
         },
 
         f:separator {},
 
         f:static_text { title = "曲线 / 细节 / 效果:", font = "<bold>" },
         f:row {
-            f:static_text { title = string.format("曲线 阴/暗/亮/高: %.0f / %.0f / %.0f / %.0f", tonumber(curveShadows) or 0, tonumber(curveDarks) or 0, tonumber(curveLights) or 0, tonumber(curveHighlights) or 0) },
+            f:static_text { title = string.format("曲线 阴/暗/亮/高: %.0f / %.0f / %.0f / %.0f", tonumber(params.curveShadows) or 0, tonumber(params.curveDarks) or 0, tonumber(params.curveLights) or 0, tonumber(params.curveHighlights) or 0) },
         },
         f:row {
-            f:static_text { title = string.format("锐化: %.0f  半径: %.1f  降噪: %.0f/%.0f", tonumber(sharpness) or 0, tonumber(sharpenRadius) or 0, tonumber(luminanceNr) or 0, tonumber(colorNr) or 0) },
+            f:static_text { title = string.format("锐化: %.0f  半径: %.1f  降噪: %.0f/%.0f", tonumber(params.sharpness) or 0, tonumber(params.sharpenRadius) or 0, tonumber(params.luminanceNr) or 0, tonumber(params.colorNr) or 0) },
         },
         f:row {
-            f:static_text { title = string.format("暗角: %.0f  颗粒: %.0f", tonumber(vignetteAmount) or 0, tonumber(grainAmount) or 0) },
+            f:static_text { title = string.format("暗角: %.0f  颗粒: %.0f", tonumber(params.vignetteAmount) or 0, tonumber(params.grainAmount) or 0) },
         },
         f:row {
-            f:static_text { title = string.format("分离色调 阴影: %.0f/%.0f  高光: %.0f/%.0f", tonumber(shadowHue) or 0, tonumber(shadowSat) or 0, tonumber(highlightHue) or 0, tonumber(highlightSat) or 0) },
+            f:static_text { title = string.format("分离色调 阴影: %.0f/%.0f  高光: %.0f/%.0f", tonumber(params.shadowHue) or 0, tonumber(params.shadowSat) or 0, tonumber(params.highlightHue) or 0, tonumber(params.highlightSat) or 0) },
         },
         f:row {
-            f:static_text { title = string.format("镜头校正: 配置 %.0f  色差 %.0f  畸变 %.0f", tonumber(lensProfileEnable) or 0, tonumber(autoLateralCA) or 0, tonumber(manualDistortion) or 0) },
+            f:static_text { title = string.format("镜头校正: 配置 %.0f  色差 %.0f  畸变 %.0f", tonumber(params.lensProfileEnable) or 0, tonumber(params.autoLateralCA) or 0, tonumber(params.manualDistortion) or 0) },
         },
 
         f:separator {},
@@ -659,80 +660,71 @@ LrTasks.startAsyncTask(function()
         log("用户选择应用参数")
         local applyOk, applyErr = LrTasks.pcall(function()
             log(string.format(
-                "准备应用到Develop滑块: Exposure=%s, Contrast=%s, Highlights=%s, Shadows=%s, Whites=%s, Blacks=%s, Texture=%s, Clarity=%s, Dehaze=%s, Vibrance=%s, Saturation=%s, Temperature=%s, Tint=%s",
-                tostring(exposure),
-                tostring(contrast),
-                tostring(highlights),
-                tostring(shadows),
-                tostring(whites),
-                tostring(blacks),
-                tostring(texture),
-                tostring(clarity),
-                tostring(dehaze),
-                tostring(vibrance),
-                tostring(saturation),
-                tostring(temperature),
-                tostring(tint)
+                "准备应用到Develop滑块: Exposure=%s, Contrast=%s, Highlights=%s, Shadows=%s",
+                tostring(params.exposure),
+                tostring(params.contrast),
+                tostring(params.highlights),
+                tostring(params.shadows)
             ))
             LrApplicationView.switchToModule("develop")
             LrTasks.sleep(1)
-            setDevelopValue("Exposure", exposure)
-            setDevelopValue("Contrast", contrast)
-            setDevelopValue("Highlights", highlights)
-            setDevelopValue("Shadows", shadows)
-            setDevelopValue("Whites", whites)
-            setDevelopValue("Blacks", blacks)
-            setDevelopValue("Texture", texture)
-            setDevelopValue("Clarity", clarity)
-            setDevelopValue("Dehaze", dehaze)
-            setDevelopValue("Vibrance", vibrance)
-            setDevelopValue("Saturation", saturation)
-            setDevelopValue("Temperature", temperature)
-            setDevelopValue("Tint", tint)
-            setDevelopValue("HueAdjustmentRed", hueRed)
-            setDevelopValue("HueAdjustmentOrange", hueOrange)
-            setDevelopValue("HueAdjustmentYellow", hueYellow)
-            setDevelopValue("HueAdjustmentGreen", hueGreen)
-            setDevelopValue("HueAdjustmentAqua", hueAqua)
-            setDevelopValue("HueAdjustmentBlue", hueBlue)
-            setDevelopValue("SaturationAdjustmentRed", satRed)
-            setDevelopValue("SaturationAdjustmentOrange", satOrange)
-            setDevelopValue("SaturationAdjustmentYellow", satYellow)
-            setDevelopValue("SaturationAdjustmentGreen", satGreen)
-            setDevelopValue("SaturationAdjustmentAqua", satAqua)
-            setDevelopValue("SaturationAdjustmentBlue", satBlue)
-            setDevelopValue("LuminanceAdjustmentRed", lumRed)
-            setDevelopValue("LuminanceAdjustmentOrange", lumOrange)
-            setDevelopValue("LuminanceAdjustmentYellow", lumYellow)
-            setDevelopValue("LuminanceAdjustmentGreen", lumGreen)
-            setDevelopValue("LuminanceAdjustmentAqua", lumAqua)
-            setDevelopValue("LuminanceAdjustmentBlue", lumBlue)
-            setDevelopValue("ParametricShadows", curveShadows)
-            setDevelopValue("ParametricDarks", curveDarks)
-            setDevelopValue("ParametricLights", curveLights)
-            setDevelopValue("ParametricHighlights", curveHighlights)
-            setDevelopValue("Sharpness", sharpness)
-            setDevelopValue("SharpenRadius", sharpenRadius)
-            setDevelopValue("SharpenDetail", sharpenDetail)
-            setDevelopValue("SharpenEdgeMasking", sharpenMasking)
-            setDevelopValue("LuminanceSmoothing", luminanceNr)
-            setDevelopValue("ColorNoiseReduction", colorNr)
-            setDevelopValue("PostCropVignetteAmount", vignetteAmount)
-            setDevelopValue("PostCropVignetteMidpoint", vignetteMidpoint)
-            setDevelopValue("PostCropVignetteFeather", vignetteFeather)
-            setDevelopValue("GrainAmount", grainAmount)
-            setDevelopValue("GrainSize", grainSize)
-            setDevelopValue("GrainFrequency", grainFrequency)
-            setDevelopValue("SplitToningShadowHue", shadowHue)
-            setDevelopValue("SplitToningShadowSaturation", shadowSat)
-            setDevelopValue("SplitToningHighlightHue", highlightHue)
-            setDevelopValue("SplitToningHighlightSaturation", highlightSat)
-            setDevelopValue("SplitToningBalance", splitBalance)
-            setDevelopValue("LensProfileEnable", lensProfileEnable)
-            setDevelopValue("AutoLateralCA", autoLateralCA)
-            setDevelopValue("LensManualDistortionAmount", manualDistortion)
-            setDevelopValue("LensVignettingAmount", lensVignettingAmount)
-            setDevelopValue("LensVignettingMidpoint", lensVignettingMidpoint)
+            setDevelopValue("Exposure", params.exposure)
+            setDevelopValue("Contrast", params.contrast)
+            setDevelopValue("Highlights", params.highlights)
+            setDevelopValue("Shadows", params.shadows)
+            setDevelopValue("Whites", params.whites)
+            setDevelopValue("Blacks", params.blacks)
+            setDevelopValue("Texture", params.texture)
+            setDevelopValue("Clarity", params.clarity)
+            setDevelopValue("Dehaze", params.dehaze)
+            setDevelopValue("Vibrance", params.vibrance)
+            setDevelopValue("Saturation", params.saturation)
+            setDevelopValue("Temperature", params.temperature)
+            setDevelopValue("Tint", params.tint)
+            setDevelopValue("HueAdjustmentRed", params.hueRed)
+            setDevelopValue("HueAdjustmentOrange", params.hueOrange)
+            setDevelopValue("HueAdjustmentYellow", params.hueYellow)
+            setDevelopValue("HueAdjustmentGreen", params.hueGreen)
+            setDevelopValue("HueAdjustmentAqua", params.hueAqua)
+            setDevelopValue("HueAdjustmentBlue", params.hueBlue)
+            setDevelopValue("SaturationAdjustmentRed", params.satRed)
+            setDevelopValue("SaturationAdjustmentOrange", params.satOrange)
+            setDevelopValue("SaturationAdjustmentYellow", params.satYellow)
+            setDevelopValue("SaturationAdjustmentGreen", params.satGreen)
+            setDevelopValue("SaturationAdjustmentAqua", params.satAqua)
+            setDevelopValue("SaturationAdjustmentBlue", params.satBlue)
+            setDevelopValue("LuminanceAdjustmentRed", params.lumRed)
+            setDevelopValue("LuminanceAdjustmentOrange", params.lumOrange)
+            setDevelopValue("LuminanceAdjustmentYellow", params.lumYellow)
+            setDevelopValue("LuminanceAdjustmentGreen", params.lumGreen)
+            setDevelopValue("LuminanceAdjustmentAqua", params.lumAqua)
+            setDevelopValue("LuminanceAdjustmentBlue", params.lumBlue)
+            setDevelopValue("ParametricShadows", params.curveShadows)
+            setDevelopValue("ParametricDarks", params.curveDarks)
+            setDevelopValue("ParametricLights", params.curveLights)
+            setDevelopValue("ParametricHighlights", params.curveHighlights)
+            setDevelopValue("Sharpness", params.sharpness)
+            setDevelopValue("SharpenRadius", params.sharpenRadius)
+            setDevelopValue("SharpenDetail", params.sharpenDetail)
+            setDevelopValue("SharpenEdgeMasking", params.sharpenMasking)
+            setDevelopValue("LuminanceSmoothing", params.luminanceNr)
+            setDevelopValue("ColorNoiseReduction", params.colorNr)
+            setDevelopValue("PostCropVignetteAmount", params.vignetteAmount)
+            setDevelopValue("PostCropVignetteMidpoint", params.vignetteMidpoint)
+            setDevelopValue("PostCropVignetteFeather", params.vignetteFeather)
+            setDevelopValue("GrainAmount", params.grainAmount)
+            setDevelopValue("GrainSize", params.grainSize)
+            setDevelopValue("GrainFrequency", params.grainFrequency)
+            setDevelopValue("SplitToningShadowHue", params.shadowHue)
+            setDevelopValue("SplitToningShadowSaturation", params.shadowSat)
+            setDevelopValue("SplitToningHighlightHue", params.highlightHue)
+            setDevelopValue("SplitToningHighlightSaturation", params.highlightSat)
+            setDevelopValue("SplitToningBalance", params.splitBalance)
+            setDevelopValue("LensProfileEnable", params.lensProfileEnable)
+            setDevelopValue("AutoLateralCA", params.autoLateralCA)
+            setDevelopValue("LensManualDistortionAmount", params.manualDistortion)
+            setDevelopValue("LensVignettingAmount", params.lensVignettingAmount)
+            setDevelopValue("LensVignettingMidpoint", params.lensVignettingMidpoint)
         end)
         if applyOk then
             log("LrDevelopController应用流程完成")
