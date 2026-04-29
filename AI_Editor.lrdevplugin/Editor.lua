@@ -441,7 +441,9 @@ LrTasks.startAsyncTask(function()
     vbsFile:close()
     log("vbs文件: " .. vbsPath)
 
-    LrTasks.execute(string.format('wscript.exe "%s"', vbsPath:gsub("/", "\\")))
+    -- 使用完整路径调用wscript
+    local wscriptPath = "C:\\Windows\\System32\\wscript.exe"
+    LrTasks.execute(string.format('%s "%s"', wscriptPath, vbsPath:gsub("/", "\\")))
     log("已隐藏启动Python进程")
 
     -- 等待结果文件，同时检测错误
