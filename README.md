@@ -14,8 +14,8 @@ Lightroom Classic AI修图助手
 ```
 Lightroom (Lua插件)
     ↓ 导出小预览图 (384px)
-    ↓ 写入请求JSON
-Python Worker
+    ↓ LrHttp.post 发送JSON请求
+Python HTTP Service (worker_service.py)
     ↓ 调用LiteLLM Proxy
 视觉模型 (GPT-4o / Claude / Gemini / Mimo / Ollama)
     ↓ 返回JSON (建议 + 参数)
@@ -26,16 +26,18 @@ Lightroom
 
 ## 安装
 
-### 1. 安装LiteLLM
+### 1. 安装Python依赖
 
 ```bash
 pip install litellm
+cd worker
+pip install -r requirements.txt
 ```
 
 ### 2. 创建LiteLLM配置
 
 ```yaml
-# litellm_config.yaml
+# litellm_config.yaml (参考 litellm_config.yaml.example)
 model_list:
   - model_name: gpt-4o
     litellm_params:
@@ -47,29 +49,11 @@ model_list:
       model: claude-3-5-sonnet-20241022
       api_key: os.environ/ANTHROPIC_API_KEY
 
-  - model_name: local-vision
-    litellm_params:
-      model: ollama/llava
-      api_base: http://localhost:11434
-
 general_settings:
   master_key: your-master-key
 ```
 
-### 3. 启动LiteLLM Proxy
-
-```bash
-litellm --config litellm_config.yaml --port 4000
-```
-
-### 4. 安装Python Worker依赖
-
-```bash
-cd worker
-pip install -r requirements.txt
-```
-
-### 5. 安装Lightroom插件
+### 3. 安装Lightroom插件
 
 1. 打开 Lightroom Classic
 2. 点击菜单 **文件 → 增效工具管理器**
@@ -88,6 +72,34 @@ pip install -r requirements.txt
 
 ## 使用
 
+### 启动服务（必须先启动）
+
+使用前需要启动两个服务：
+
+**1. 启动 LiteLLM Proxy**（AI 模型代理）
+
+```bash
+cd lr-ai-editor
+litellm --config litellm_config.yaml --port 4000
+```
+
+**2. 启动 HTTP 分析服务**
+
+```bash
+cd lr-ai-editor/worker
+python worker_service.py --port 5000
+```
+
+服务启动后会显示：
+```
+LR AI Editor 服务启动在 http://127.0.0.1:5000
+API 端点:
+  GET  /health  - 健康检查
+  POST /analyze - 分析图片
+```
+
+### 在 Lightroom 中使用
+
 1. 在 Lightroom 中选中一张照片（建议先切换到 Develop 模块）
 2. 点击菜单 **文件 → 增效工具额外功能 → AI Analyze Photo**（与"增效工具管理器"在同一菜单下）
 
@@ -97,7 +109,7 @@ pip install -r requirements.txt
    - "自然干净的人像，肤色优先"
    - "电影感，偏暖色调"
    - "高对比黑白风格"
-4. 点击确定，等待 AI 分析（约 10-60 秒）
+4. 点击确定，等待 AI 分析（约 5-30 秒）
 5. 查看分析结果和建议参数
 6. 勾选"应用这些参数到照片"，点击确定应用
 
@@ -118,9 +130,9 @@ pip install -r requirements.txt
 
 | 参数 | 说明 | 当前值 |
 |------|------|--------|
+| `SERVICE_URL` | HTTP服务地址 | `http://127.0.0.1:5000/analyze` |
 | `PREVIEW_SIZE` | 预览图尺寸 | 384px |
-| `MODEL` | 模型名称 | `litellm_proxy/mimo` |
-| `WAIT_TIMEOUT_SECONDS` | 等待超时 | 70秒 |
+| `REQUEST_TIMEOUT` | HTTP超时 | 60秒 |
 
 ## 支持的调整参数
 
