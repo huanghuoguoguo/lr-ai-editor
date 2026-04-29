@@ -88,6 +88,10 @@ local function getDevelopValue(param, defaultValue)
     return defaultValue
 end
 
+local function resultNumber(content, key)
+    return content:match('"' .. key .. '"%s*:%s*([%-?%d%.]+)')
+end
+
 LrTasks.startAsyncTask(function()
     log("=== 开始AI分析 ===")
 
@@ -196,6 +200,24 @@ LrTasks.startAsyncTask(function()
         Saturation = getDevelopValue("Saturation", 0),
         Temperature = getDevelopValue("Temperature", 6500),
         Tint = getDevelopValue("Tint", 0),
+        HueAdjustmentRed = getDevelopValue("HueAdjustmentRed", 0),
+        HueAdjustmentOrange = getDevelopValue("HueAdjustmentOrange", 0),
+        HueAdjustmentYellow = getDevelopValue("HueAdjustmentYellow", 0),
+        HueAdjustmentGreen = getDevelopValue("HueAdjustmentGreen", 0),
+        HueAdjustmentAqua = getDevelopValue("HueAdjustmentAqua", 0),
+        HueAdjustmentBlue = getDevelopValue("HueAdjustmentBlue", 0),
+        SaturationAdjustmentRed = getDevelopValue("SaturationAdjustmentRed", 0),
+        SaturationAdjustmentOrange = getDevelopValue("SaturationAdjustmentOrange", 0),
+        SaturationAdjustmentYellow = getDevelopValue("SaturationAdjustmentYellow", 0),
+        SaturationAdjustmentGreen = getDevelopValue("SaturationAdjustmentGreen", 0),
+        SaturationAdjustmentAqua = getDevelopValue("SaturationAdjustmentAqua", 0),
+        SaturationAdjustmentBlue = getDevelopValue("SaturationAdjustmentBlue", 0),
+        LuminanceAdjustmentRed = getDevelopValue("LuminanceAdjustmentRed", 0),
+        LuminanceAdjustmentOrange = getDevelopValue("LuminanceAdjustmentOrange", 0),
+        LuminanceAdjustmentYellow = getDevelopValue("LuminanceAdjustmentYellow", 0),
+        LuminanceAdjustmentGreen = getDevelopValue("LuminanceAdjustmentGreen", 0),
+        LuminanceAdjustmentAqua = getDevelopValue("LuminanceAdjustmentAqua", 0),
+        LuminanceAdjustmentBlue = getDevelopValue("LuminanceAdjustmentBlue", 0),
     }
     log(string.format(
         "当前Develop参数: Exposure=%s, Contrast=%s, Highlights=%s, Shadows=%s, Whites=%s, Blacks=%s, Texture=%s, Clarity=%s, Dehaze=%s, Vibrance=%s, Saturation=%s, Temperature=%s, Tint=%s",
@@ -235,7 +257,25 @@ LrTasks.startAsyncTask(function()
     "Vibrance": %s,
     "Saturation": %s,
     "Temperature": %s,
-    "Tint": %s
+    "Tint": %s,
+    "HueAdjustmentRed": %s,
+    "HueAdjustmentOrange": %s,
+    "HueAdjustmentYellow": %s,
+    "HueAdjustmentGreen": %s,
+    "HueAdjustmentAqua": %s,
+    "HueAdjustmentBlue": %s,
+    "SaturationAdjustmentRed": %s,
+    "SaturationAdjustmentOrange": %s,
+    "SaturationAdjustmentYellow": %s,
+    "SaturationAdjustmentGreen": %s,
+    "SaturationAdjustmentAqua": %s,
+    "SaturationAdjustmentBlue": %s,
+    "LuminanceAdjustmentRed": %s,
+    "LuminanceAdjustmentOrange": %s,
+    "LuminanceAdjustmentYellow": %s,
+    "LuminanceAdjustmentGreen": %s,
+    "LuminanceAdjustmentAqua": %s,
+    "LuminanceAdjustmentBlue": %s
   },
   "metadata": {
     "fileName": "%s",
@@ -265,6 +305,24 @@ LrTasks.startAsyncTask(function()
         developSetting(currentSettings, "Saturation", nil, 0),
         developSetting(currentSettings, "Temperature", nil, 6500),
         developSetting(currentSettings, "Tint", nil, 0),
+        developSetting(currentSettings, "HueAdjustmentRed", nil, 0),
+        developSetting(currentSettings, "HueAdjustmentOrange", nil, 0),
+        developSetting(currentSettings, "HueAdjustmentYellow", nil, 0),
+        developSetting(currentSettings, "HueAdjustmentGreen", nil, 0),
+        developSetting(currentSettings, "HueAdjustmentAqua", nil, 0),
+        developSetting(currentSettings, "HueAdjustmentBlue", nil, 0),
+        developSetting(currentSettings, "SaturationAdjustmentRed", nil, 0),
+        developSetting(currentSettings, "SaturationAdjustmentOrange", nil, 0),
+        developSetting(currentSettings, "SaturationAdjustmentYellow", nil, 0),
+        developSetting(currentSettings, "SaturationAdjustmentGreen", nil, 0),
+        developSetting(currentSettings, "SaturationAdjustmentAqua", nil, 0),
+        developSetting(currentSettings, "SaturationAdjustmentBlue", nil, 0),
+        developSetting(currentSettings, "LuminanceAdjustmentRed", nil, 0),
+        developSetting(currentSettings, "LuminanceAdjustmentOrange", nil, 0),
+        developSetting(currentSettings, "LuminanceAdjustmentYellow", nil, 0),
+        developSetting(currentSettings, "LuminanceAdjustmentGreen", nil, 0),
+        developSetting(currentSettings, "LuminanceAdjustmentAqua", nil, 0),
+        developSetting(currentSettings, "LuminanceAdjustmentBlue", nil, 0),
         jsonEscape(metadataValue(photo, "fileName")),
         jsonEscape(metadataValue(photo, "cameraModel")),
         jsonEscape(metadataValue(photo, "lens")),
@@ -346,19 +404,37 @@ LrTasks.startAsyncTask(function()
 
     -- 解析JSON
     local advice = resultContent:match('"advice"%s*:%s*"([^"]*)"')
-    local exposure = resultContent:match('"exposure"%s*:%s*([%-?%d%.]+)')
-    local contrast = resultContent:match('"contrast"%s*:%s*([%-?%d%.]+)')
-    local highlights = resultContent:match('"highlights"%s*:%s*([%-?%d%.]+)')
-    local shadows = resultContent:match('"shadows"%s*:%s*([%-?%d%.]+)')
-    local whites = resultContent:match('"whites"%s*:%s*([%-?%d%.]+)')
-    local blacks = resultContent:match('"blacks"%s*:%s*([%-?%d%.]+)')
-    local texture = resultContent:match('"texture"%s*:%s*([%-?%d%.]+)')
-    local clarity = resultContent:match('"clarity"%s*:%s*([%-?%d%.]+)')
-    local dehaze = resultContent:match('"dehaze"%s*:%s*([%-?%d%.]+)')
-    local vibrance = resultContent:match('"vibrance"%s*:%s*([%-?%d%.]+)')
-    local saturation = resultContent:match('"saturation"%s*:%s*([%-?%d%.]+)')
-    local temperature = resultContent:match('"temperature"%s*:%s*([%-?%d%.]+)')
-    local tint = resultContent:match('"tint"%s*:%s*([%-?%d%.]+)')
+    local exposure = resultNumber(resultContent, "exposure")
+    local contrast = resultNumber(resultContent, "contrast")
+    local highlights = resultNumber(resultContent, "highlights")
+    local shadows = resultNumber(resultContent, "shadows")
+    local whites = resultNumber(resultContent, "whites")
+    local blacks = resultNumber(resultContent, "blacks")
+    local texture = resultNumber(resultContent, "texture")
+    local clarity = resultNumber(resultContent, "clarity")
+    local dehaze = resultNumber(resultContent, "dehaze")
+    local vibrance = resultNumber(resultContent, "vibrance")
+    local saturation = resultNumber(resultContent, "saturation")
+    local temperature = resultNumber(resultContent, "temperature")
+    local tint = resultNumber(resultContent, "tint")
+    local hueRed = resultNumber(resultContent, "hue_red")
+    local hueOrange = resultNumber(resultContent, "hue_orange")
+    local hueYellow = resultNumber(resultContent, "hue_yellow")
+    local hueGreen = resultNumber(resultContent, "hue_green")
+    local hueAqua = resultNumber(resultContent, "hue_aqua")
+    local hueBlue = resultNumber(resultContent, "hue_blue")
+    local satRed = resultNumber(resultContent, "saturation_red")
+    local satOrange = resultNumber(resultContent, "saturation_orange")
+    local satYellow = resultNumber(resultContent, "saturation_yellow")
+    local satGreen = resultNumber(resultContent, "saturation_green")
+    local satAqua = resultNumber(resultContent, "saturation_aqua")
+    local satBlue = resultNumber(resultContent, "saturation_blue")
+    local lumRed = resultNumber(resultContent, "luminance_red")
+    local lumOrange = resultNumber(resultContent, "luminance_orange")
+    local lumYellow = resultNumber(resultContent, "luminance_yellow")
+    local lumGreen = resultNumber(resultContent, "luminance_green")
+    local lumAqua = resultNumber(resultContent, "luminance_aqua")
+    local lumBlue = resultNumber(resultContent, "luminance_blue")
 
     log("解析: advice=" .. (advice or "nil"))
 
@@ -401,6 +477,19 @@ LrTasks.startAsyncTask(function()
         f:row {
             f:static_text { title = string.format("色温: %.0f", tonumber(temperature) or 0) },
             f:static_text { title = string.format("色调: %.0f", tonumber(tint) or 0) },
+        },
+
+        f:separator {},
+
+        f:static_text { title = "HSL 推荐:", font = "<bold>" },
+        f:row {
+            f:static_text { title = string.format("橙 明/饱/相: %.0f / %.0f / %.0f", tonumber(lumOrange) or 0, tonumber(satOrange) or 0, tonumber(hueOrange) or 0) },
+        },
+        f:row {
+            f:static_text { title = string.format("黄 明/饱/相: %.0f / %.0f / %.0f", tonumber(lumYellow) or 0, tonumber(satYellow) or 0, tonumber(hueYellow) or 0) },
+        },
+        f:row {
+            f:static_text { title = string.format("绿 明/饱/相: %.0f / %.0f / %.0f", tonumber(lumGreen) or 0, tonumber(satGreen) or 0, tonumber(hueGreen) or 0) },
         },
 
         f:separator {},
@@ -467,6 +556,24 @@ LrTasks.startAsyncTask(function()
             setDevelopValue("Saturation", saturation)
             setDevelopValue("Temperature", temperature)
             setDevelopValue("Tint", tint)
+            setDevelopValue("HueAdjustmentRed", hueRed)
+            setDevelopValue("HueAdjustmentOrange", hueOrange)
+            setDevelopValue("HueAdjustmentYellow", hueYellow)
+            setDevelopValue("HueAdjustmentGreen", hueGreen)
+            setDevelopValue("HueAdjustmentAqua", hueAqua)
+            setDevelopValue("HueAdjustmentBlue", hueBlue)
+            setDevelopValue("SaturationAdjustmentRed", satRed)
+            setDevelopValue("SaturationAdjustmentOrange", satOrange)
+            setDevelopValue("SaturationAdjustmentYellow", satYellow)
+            setDevelopValue("SaturationAdjustmentGreen", satGreen)
+            setDevelopValue("SaturationAdjustmentAqua", satAqua)
+            setDevelopValue("SaturationAdjustmentBlue", satBlue)
+            setDevelopValue("LuminanceAdjustmentRed", lumRed)
+            setDevelopValue("LuminanceAdjustmentOrange", lumOrange)
+            setDevelopValue("LuminanceAdjustmentYellow", lumYellow)
+            setDevelopValue("LuminanceAdjustmentGreen", lumGreen)
+            setDevelopValue("LuminanceAdjustmentAqua", lumAqua)
+            setDevelopValue("LuminanceAdjustmentBlue", lumBlue)
         end)
         if applyOk then
             log("LrDevelopController应用流程完成")

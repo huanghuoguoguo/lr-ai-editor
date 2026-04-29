@@ -58,7 +58,27 @@ BASE_PROMPT = """分析这张照片，给出Lightroom修图参数建议。
     "vibrance": 自然饱和度(-100到+100),
     "saturation": 饱和度(-100到+100),
     "temperature": 色温(2000到50000),
-    "tint": 色调(-150到+150)
+    "tint": 色调(-150到+150),
+    "hsl": {
+        "hue_red": 红色色相(-100到+100),
+        "hue_orange": 橙色色相(-100到+100),
+        "hue_yellow": 黄色色相(-100到+100),
+        "hue_green": 绿色色相(-100到+100),
+        "hue_aqua": 浅绿色相(-100到+100),
+        "hue_blue": 蓝色色相(-100到+100),
+        "saturation_red": 红色饱和度(-100到+100),
+        "saturation_orange": 橙色饱和度(-100到+100),
+        "saturation_yellow": 黄色饱和度(-100到+100),
+        "saturation_green": 绿色饱和度(-100到+100),
+        "saturation_aqua": 浅绿饱和度(-100到+100),
+        "saturation_blue": 蓝色饱和度(-100到+100),
+        "luminance_red": 红色明亮度(-100到+100),
+        "luminance_orange": 橙色明亮度(-100到+100),
+        "luminance_yellow": 黄色明亮度(-100到+100),
+        "luminance_green": 绿色明亮度(-100到+100),
+        "luminance_aqua": 浅绿明亮度(-100到+100),
+        "luminance_blue": 蓝色明亮度(-100到+100)
+    }
 }
 
 注意：数值必须严格在范围内，超出范围会被截断。"""

@@ -118,6 +118,50 @@ def result_from_reasoning(reasoning: str, current_settings: dict | None = None) 
     return apply_mvp_safety_limits(extracted, current_settings)
 
 
+HSL_FIELDS = {
+    "hue_red": ("HueAdjustmentRed", -8, 8, 0),
+    "hue_orange": ("HueAdjustmentOrange", -6, 6, 0),
+    "hue_yellow": ("HueAdjustmentYellow", -10, 10, 0),
+    "hue_green": ("HueAdjustmentGreen", -12, 12, 0),
+    "hue_aqua": ("HueAdjustmentAqua", -8, 8, 0),
+    "hue_blue": ("HueAdjustmentBlue", -8, 8, 0),
+    "saturation_red": ("SaturationAdjustmentRed", -10, 8, 0),
+    "saturation_orange": ("SaturationAdjustmentOrange", -8, 8, 0),
+    "saturation_yellow": ("SaturationAdjustmentYellow", -18, 8, 0),
+    "saturation_green": ("SaturationAdjustmentGreen", -22, 10, 0),
+    "saturation_aqua": ("SaturationAdjustmentAqua", -10, 10, 0),
+    "saturation_blue": ("SaturationAdjustmentBlue", -10, 10, 0),
+    "luminance_red": ("LuminanceAdjustmentRed", -8, 10, 0),
+    "luminance_orange": ("LuminanceAdjustmentOrange", -6, 12, 0),
+    "luminance_yellow": ("LuminanceAdjustmentYellow", -15, 10, 0),
+    "luminance_green": ("LuminanceAdjustmentGreen", -15, 12, 0),
+    "luminance_aqua": ("LuminanceAdjustmentAqua", -8, 8, 0),
+    "luminance_blue": ("LuminanceAdjustmentBlue", -8, 8, 0),
+}
+
+
+def normalize_hsl(result: dict, current_settings: dict | None = None) -> dict:
+    source = result.get("hsl")
+    if not isinstance(source, dict):
+        source = {}
+    normalized = {}
+    for output_key, (lr_key, low, high, fallback) in HSL_FIELDS.items():
+        try:
+            value = float(source.get(output_key, current_settings.get(lr_key, fallback) if current_settings else fallback))
+        except (TypeError, ValueError):
+            value = fallback
+        value = max(low, min(high, value))
+        if current_settings:
+            try:
+                current = float(current_settings.get(lr_key, fallback))
+                value = max(current - 8, min(current + 8, value))
+            except (TypeError, ValueError):
+                pass
+        normalized[output_key] = value
+    result["hsl"] = normalized
+    return result
+
+
 def apply_mvp_safety_limits(result: dict, current_settings: dict | None = None) -> dict:
     """Keep MVP auto-edits conservative enough for portraits."""
     limits = {
@@ -166,7 +210,7 @@ def apply_mvp_safety_limits(result: dict, current_settings: dict | None = None) 
                 result[output_key] = max(current - max_delta, min(current + max_delta, value))
             except (TypeError, ValueError):
                 pass
-    return result
+    return normalize_hsl(result, current_settings)
 
 
 async def analyze_image(
