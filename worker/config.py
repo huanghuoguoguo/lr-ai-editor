@@ -20,8 +20,8 @@ DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "litellm_proxy/mimo")
 # Temperature
 TEMPERATURE = 1
 
-# MVP只需要短JSON，限制输出长度以减少等待时间。
-MAX_TOKENS = 500
+# JSON输出较长（包含HSL、曲线、效果等），需要足够tokens。
+MAX_TOKENS = 2000
 
 # 单次模型请求超时。Lightroom外层等待45秒，这里要更短，保证能写出result.json。
 REQUEST_TIMEOUT_SECONDS = int(os.getenv("REQUEST_TIMEOUT_SECONDS", "60"))
