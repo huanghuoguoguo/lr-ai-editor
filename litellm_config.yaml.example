@@ -1,0 +1,35 @@
+# LiteLLM配置示例
+# 将此文件保存为 litellm_config.yaml
+
+model_list:
+  # OpenAI GPT-4o (推荐，视觉能力强)
+  - model_name: gpt-4o
+    litellm_params:
+      model: openai/gpt-4o
+      api_key: os.environ/OPENAI_API_KEY
+
+  # Anthropic Claude (视觉能力优秀)
+  - model_name: claude-vision
+    litellm_params:
+      model: claude-3-5-sonnet-20241022
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  # Google Gemini
+  - model_name: gemini-vision
+    litellm_params:
+      model: gemini/gemini-1.5-flash
+      api_key: os.environ/GEMINI_API_KEY
+
+  # 本地模型 (通过Ollama)
+  - model_name: local-vision
+    litellm_params:
+      model: ollama/llava:13b
+      api_base: http://localhost:11434
+
+# 通用设置
+general_settings:
+  # 主密钥 (可选，用于保护API)
+  master_key: sk-lr-editor
+
+  # 日志级别
+  # LogLevel: INFO
