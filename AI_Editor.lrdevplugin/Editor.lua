@@ -444,10 +444,12 @@ LrTasks.startAsyncTask(function()
     LrTasks.execute(string.format('wscript.exe "%s"', vbsPath:gsub("/", "\\")))
     log("已隐藏启动Python进程")
 
-    -- 等待结果文件
+    -- 等待结果文件，同时检测错误
     local resultPath = tempDir .. "/result.json"
     local maxWait = WAIT_TIMEOUT_SECONDS
     local waited = 0
+    local workerStarted = false
+    local lastLogCheck = 0
 
     while not LrFileUtils.exists(resultPath) and waited < maxWait do
         if progress:isCanceled() then
@@ -459,8 +461,53 @@ LrTasks.startAsyncTask(function()
         waited = waited + 1
         progress:setPortionComplete(waited, maxWait)
         progress:setCaption(string.format("AI分析中... %d秒", waited))
-        if waited % 10 == 0 then
-            log("等待... " .. waited .. "秒")
+
+        -- 每3秒检查worker日志，检测启动状态和错误
+        if waited % 3 == 0 then
+            local logFile = io.open(workerLogPath, "r")
+            if logFile then
+                local logContent = logFile:read("*a")
+                logFile:close()
+                if logContent and logContent ~= "" then
+                    workerStarted = true
+                    -- 检查是否有错误标记
+                    if logContent:find("failed") or logContent:find("错误") or logContent:find("Error") or logContent:find("failed:") then
+                        log("检测到worker错误: " .. logContent:sub(1, 200))
+                        -- 等一下看是否会生成result.json（worker会写错误结果）
+                        LrTasks.sleep(2)
+                        if not LrFileUtils.exists(resultPath) then
+                            progress:done()
+                            LrDialogs.message("AI分析失败", "Worker执行出错:\n" .. logContent .. "\n\n日志: " .. LOG_FILE)
+                            return
+                        end
+                    end
+                end
+            end
+
+            -- 10秒后如果worker还没启动，提前报错
+            if waited >= 10 and not workerStarted then
+                log("Worker未启动，检查Python环境")
+                -- 再等2秒确认
+                LrTasks.sleep(2)
+                local logFile2 = io.open(workerLogPath, "r")
+                local logContent2 = logFile2 and logFile2:read("*a") or ""
+                if logFile2 then logFile2:close() end
+                if logContent2 == "" then
+                    progress:done()
+                    LrDialogs.message("Worker未启动",
+                        "Python进程未启动，请检查:\n" ..
+                        "1. python是否在系统PATH中（CMD运行python --version）\n" ..
+                        "2. LiteLLM是否运行（litellm --config litellm_config.yaml --port 4000）\n" ..
+                        "3. worker目录是否存在\n\n" ..
+                        "临时目录: " .. tempDir .. "\n" ..
+                        "VBS文件: " .. vbsPath)
+                    return
+                end
+            end
+
+            if waited % 10 == 0 then
+                log("等待... " .. waited .. "秒, worker已启动: " .. tostring(workerStarted))
+            end
         end
     end
 
@@ -468,7 +515,13 @@ LrTasks.startAsyncTask(function()
 
     if not LrFileUtils.exists(resultPath) then
         log("超时! 等待了" .. waited .. "秒")
-        LrDialogs.message("超时", "AI分析超时，已等待 " .. waited .. " 秒\n日志: " .. LOG_FILE .. "\nWorker日志: " .. workerLogPath)
+        local logFile = io.open(workerLogPath, "r")
+        local logContent = logFile and logFile:read("*a") or "(无日志)"
+        if logFile then logFile:close() end
+        LrDialogs.message("超时",
+            "AI分析超时，已等待 " .. waited .. " 秒\n\n" ..
+            "Worker日志:\n" .. logContent .. "\n\n" ..
+            "插件日志: " .. LOG_FILE)
         return
     end
 
