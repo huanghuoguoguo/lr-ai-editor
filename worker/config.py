@@ -5,17 +5,24 @@
 import os
 
 # ------------------------------------------------------------------
-# 模型配置 (LiteLLM格式)
+# 模型配置 (直接调用，无需 LiteLLM Proxy)
 # ------------------------------------------------------------------
 
-# LiteLLM Proxy Key
-API_KEY = os.getenv("LITELLM_PROXY_API_KEY", "sk-lr-editor")
+# 模型名称 (LiteLLM格式)
+# 示例:
+#   - openai/gpt-4o (需要 OPENAI_API_KEY)
+#   - anthropic/claude-3-5-sonnet-20241022 (需要 ANTHROPIC_API_KEY)
+#   - xiaomi_mimo/mimo-v2.5 (自定义 API)
+DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "xiaomi_mimo/mimo-v2.5")
 
-# LiteLLM Proxy URL
-API_BASE = os.getenv("LITELLM_PROXY_API_BASE", "http://localhost:4000")
+# API Key (根据模型类型设置)
+# 对于 openai/* 模型: 设置 OPENAI_API_KEY 或 API_KEY
+# 对于 anthropic/* 模型: 设置 ANTHROPIC_API_KEY 或 API_KEY
+# 对于自定义模型: 设置 API_KEY
+API_KEY = os.getenv("API_KEY", "tp-c2s2tdwa00bi0gm8qdgbbe0vnx6sah07e89rf5aszl01x4bs")
 
-# 默认模型。mimo 是 litellm_config.yaml 里的 model_name 别名。
-DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "litellm_proxy/mimo")
+# API Base URL (可选，用于自定义 API)
+API_BASE = os.getenv("API_BASE", "https://token-plan-cn.xiaomimimo.com/v1")
 
 # Temperature
 TEMPERATURE = 1
@@ -23,7 +30,7 @@ TEMPERATURE = 1
 # JSON输出较长（包含HSL、曲线、效果等），需要足够tokens。
 MAX_TOKENS = 2000
 
-# 单次模型请求超时。Lightroom外层等待45秒，这里要更短，保证能写出result.json。
+# 单次模型请求超时
 REQUEST_TIMEOUT_SECONDS = int(os.getenv("REQUEST_TIMEOUT_SECONDS", "60"))
 
 # ------------------------------------------------------------------
