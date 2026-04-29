@@ -148,10 +148,9 @@ LrTasks.startAsyncTask(function()
     end
     log("用户修图要求: " .. tostring(prefs.stylePrompt))
 
-    -- 创建临时文件夹 (使用系统临时目录)
+    -- 创建临时文件夹 (使用插件目录)
     local timestamp = os.time()
-    local tempBase = os.getenv("TEMP") or os.getenv("TMP") or "C:/Temp"
-    local tempDir = tempBase .. "/lr_ai_" .. timestamp
+    local tempDir = PLUGIN_PATH .. "/temp_" .. timestamp
     LrFileUtils.createAllDirectories(tempDir)
     log("临时目录: " .. tempDir)
 
